@@ -50,10 +50,10 @@ export const DateMultiSelect: React.FC<DateMultiSelectProps> = ({
             const tileStyle = hasConflict
               ? 'bg-rose-600 text-white animate-pulse ring-2 ring-rose-400'
               : isSelected
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-2 ring-indigo-400'
-              : existingEvt
-              ? 'bg-slate-900 text-indigo-200 border border-indigo-500/50 hover:bg-indigo-950/40'
-              : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800/60';
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-2 ring-indigo-400'
+                : existingEvt
+                  ? 'bg-slate-900 text-indigo-200 border border-indigo-500/50 hover:bg-indigo-950/40'
+                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800/60';
 
             return (
               <button
@@ -65,14 +65,13 @@ export const DateMultiSelect: React.FC<DateMultiSelectProps> = ({
                 <span className="leading-tight text-[11px] font-extrabold pt-0.5">{dNum}</span>
                 {existingEvt && (
                   <span
-                    className={`w-full text-[8px] font-bold text-center truncate px-0.5 leading-none py-0.5 rounded ${
-                      isSelected
-                        ? 'bg-white/20 text-white'
-                        : 'bg-indigo-500/25 text-indigo-200 border border-indigo-500/30'
-                    }`}
+                    className={`w-full text-[8px] font-bold text-left truncate px-0.5 leading-none py-0.5 rounded ${isSelected
+                      ? 'bg-white/20 text-white'
+                      : 'bg-indigo-500/25 text-indigo-200 border border-indigo-500/30'
+                      }`}
                     title={`Cantante asignado: ${existingSinger}`}
                   >
-                    🎤 {firstSingerName}
+                    {firstSingerName}
                   </span>
                 )}
               </button>
