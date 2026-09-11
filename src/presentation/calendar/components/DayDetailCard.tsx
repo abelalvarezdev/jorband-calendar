@@ -2,14 +2,17 @@ import React from 'react';
 import { DayData } from '../types/calendar.types';
 import { Badge } from '../../shared/Badge';
 import { Calendar, Mic, UserX, Clock, Sparkles } from 'lucide-react';
+import { getSingerColor } from '../utils/singerColor';
 
 export const DayDetailCard: React.FC<{ dayData: DayData }> = ({ dayData }) => {
   const { dateStr = '', event, absents = [] } = dayData;
   const parts = dateStr.split('-');
   const [y, m, d] = parts.length === 3 ? parts : ['', '', ''];
 
+  const palette = event ? getSingerColor(event.principalSinger, event.isGuestSinger) : null;
+
   return (
-    <div className="mt-4 bg-slate-900/90 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
+    <div className={`mt-4 bg-slate-900/90 border rounded-3xl p-4 shadow-xl space-y-3 transition-colors ${palette ? `${palette.border} ${palette.bg}` : 'border-slate-800'}`}>
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
         <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-indigo-400" /><h3 className="text-sm font-bold text-white">Detalle del {d}/{m}/{y}</h3></div>
         {event ? <Badge variant={event.isGuestSinger ? 'amber' : 'indigo'}>Evento Programado</Badge> : <Badge variant="slate">Sin Evento</Badge>}
@@ -17,7 +20,14 @@ export const DayDetailCard: React.FC<{ dayData: DayData }> = ({ dayData }) => {
       {event && (
         <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/60 space-y-2">
           <div className="flex justify-between items-start"><h4 className="text-sm font-extrabold text-indigo-300">{event.eventName}</h4><span className="text-xs text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" />{event.time}</span></div>
-          <div className="flex items-center gap-2 pt-1"><Mic className="w-4 h-4 text-amber-400 shrink-0" /><span className="text-xs text-slate-300">Cantante:</span><span className="text-xs font-bold text-white flex items-center gap-1">{event.principalSinger || 'Sin cantante'}{event.isGuestSinger && <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full border border-amber-500/30 flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" />Invitado</span>}</span></div>
+          <div className="flex items-center gap-2 pt-1">
+            <Mic className={`w-4 h-4 shrink-0 ${palette?.badgeText || 'text-amber-400'}`} />
+            <span className="text-xs text-slate-300">Cantante:</span>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-lg border flex items-center gap-1.5 ${palette ? `${palette.badgeBg} ${palette.badgeText} ${palette.badgeBorder}` : 'text-white'}`}>
+              {event.principalSinger || 'Sin cantante'}
+              {event.isGuestSinger && <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full border border-amber-500/30 flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" />Invitado</span>}
+            </span>
+          </div>
         </div>
       )}
       <div className="space-y-2 pt-1">

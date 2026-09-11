@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRepositories } from '../../../infrastructure/di/RepositoryContext';
-import { User, Absent } from '../../../domain/types';
+import { User, Absent, Event } from '../../../domain/types';
 import { ConflictInfo } from '../types/events.types';
 
 export const useEventsForm = () => {
@@ -8,6 +8,7 @@ export const useEventsForm = () => {
 
   const [members, setMembers] = useState<User[]>([]);
   const [monthAbsents, setMonthAbsents] = useState<Absent[]>([]);
+  const [monthEvents, setMonthEvents] = useState<Event[]>([]);
 
   const today = new Date();
   const [currentYear, setCurrentYear] = useState<number>(today.getFullYear());
@@ -25,10 +26,12 @@ export const useEventsForm = () => {
 
   const loadData = useCallback(async () => {
     try {
-      const [mList, abs] = await Promise.all([
+      const [evts, mList, abs] = await Promise.all([
+        eventRepository.getEventsByMonth(currentYear, currentMonth),
         authRepository.getAllMembers(),
         absentRepository.getAbsentsByMonth(currentYear, currentMonth),
       ]);
+      setMonthEvents(evts);
       setMembers(mList);
       setMonthAbsents(abs);
       if (mList.length > 0 && !principalSinger) {
@@ -43,7 +46,7 @@ export const useEventsForm = () => {
     } catch (err) {
       console.error('Error loading events form data:', err);
     }
-  }, [authRepository, absentRepository, currentYear, currentMonth, principalSinger]);
+  }, [authRepository, eventRepository, absentRepository, currentYear, currentMonth, principalSinger]);
 
   useEffect(() => {
     loadData();
@@ -140,6 +143,7 @@ export const useEventsForm = () => {
       showToast(`¡${newEvents.length} evento(s) programado(s) exitosamente!`);
       setSelectedDates([]);
       setGuestSingerName('');
+      await loadData();
     } catch (err: any) {
       showToast(err.message || 'Error al guardar los eventos', 'error');
     } finally {
@@ -149,6 +153,7 @@ export const useEventsForm = () => {
 
   return {
     members,
+    monthEvents,
     selectedDates,
     eventName,
     setEventName,

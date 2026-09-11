@@ -19,7 +19,7 @@ export const EventsScreen: React.FC = () => {
         <Input label="Nombre del Evento" value={form.eventName} onChange={(e) => form.setEventName(e.target.value)} required />
         <Input label="Hora del Evento" value={form.eventTime} onChange={(e) => form.setEventTime(e.target.value)} required />
         <SingerSelector members={form.members} principalSinger={form.principalSinger} setPrincipalSinger={form.setPrincipalSinger} isGuestSinger={form.isGuestSinger} setIsGuestSinger={form.setIsGuestSinger} guestSingerName={form.guestSingerName} setGuestSingerName={form.setGuestSingerName} />
-        <DateMultiSelect year={form.currentYear} month={form.currentMonth} selectedDates={form.selectedDates} conflicts={form.conflicts} onToggleDate={form.toggleDateSelection} onSelectRecurring={form.selectRecurringDay} onPrevMonth={form.handlePrevMonth} onNextMonth={form.handleNextMonth} />
+        <DateMultiSelect existingEvents={form.monthEvents} year={form.currentYear} month={form.currentMonth} selectedDates={form.selectedDates} conflicts={form.conflicts} onToggleDate={form.toggleDateSelection} onSelectRecurring={form.selectRecurringDay} onPrevMonth={form.handlePrevMonth} onNextMonth={form.handleNextMonth} />
         <EventConflictAlert conflicts={form.conflicts} />
         <Button type="submit" variant="primary" className="w-full" disabled={form.loading || form.conflicts.length > 0}>
           {form.loading ? 'Guardando...' : `Guardar Eventos (${form.selectedDates.length})`}
