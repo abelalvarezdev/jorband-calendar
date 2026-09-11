@@ -23,7 +23,15 @@ export const SingerSelector: React.FC<SingerSelectorProps> = ({
   guestSingerName,
   setGuestSingerName,
 }) => {
-  const options = members.map((m) => ({
+  const singerMembers = members.filter(
+    (m) =>
+      m.instrument?.toLowerCase().includes('voz') ||
+      m.instrument?.toLowerCase().includes('cantante')
+  );
+
+  const displayMembers = singerMembers.length > 0 ? singerMembers : members;
+
+  const options = displayMembers.map((m) => ({
     value: m.name,
     label: `${m.name} (${m.instrument})`,
   }));

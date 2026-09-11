@@ -29,6 +29,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <ChevronRight className="w-5 h-5" />
       </button>
     </div>
-    <Switch labelLeft="Eventos (Cantante)" labelRight="Ausencias (Integrantes)" checked={showAbsents} onChange={onToggleView} />
+    <Switch labelLeft="Cantante" labelRight="Ausencias" checked={showAbsents} onChange={onToggleView} />
   </div>
 );

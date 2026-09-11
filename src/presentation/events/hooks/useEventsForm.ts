@@ -32,7 +32,12 @@ export const useEventsForm = () => {
       setMembers(mList);
       setMonthAbsents(abs);
       if (mList.length > 0 && !principalSinger) {
-        const firstSinger = mList.find((m) => m.instrument.includes('Voz')) || mList[0];
+        const firstSinger =
+          mList.find(
+            (m) =>
+              m.instrument?.toLowerCase().includes('voz') ||
+              m.instrument?.toLowerCase().includes('cantante')
+          ) || mList[0];
         setPrincipalSinger(firstSinger.name);
       }
     } catch (err) {
