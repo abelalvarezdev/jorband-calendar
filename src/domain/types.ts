@@ -15,6 +15,9 @@ export interface Event {
   time: string;
   principalSinger: string; // Member name or Guest name
   isGuestSinger: boolean;
+  notes?: string;
+  isCancelled?: boolean;
+  cancelReason?: string;
 }
 
 export interface Absent {

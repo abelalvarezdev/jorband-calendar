@@ -17,10 +17,12 @@ export const useEventsForm = () => {
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [eventName, setEventName] = useState<string>('Culto de Adoración');
   const [eventTime, setEventTime] = useState<string>('07:00 PM');
+  const [notes, setNotes] = useState<string>('');
   const [principalSinger, setPrincipalSinger] = useState<string>('');
   const [isGuestSinger, setIsGuestSinger] = useState<boolean>(false);
   const [guestSingerName, setGuestSingerName] = useState<string>('');
 
+  const [eventToRestore, setEventToRestore] = useState<Event | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -35,12 +37,7 @@ export const useEventsForm = () => {
       setMembers(mList);
       setMonthAbsents(abs);
       if (mList.length > 0 && !principalSinger) {
-        const firstSinger =
-          mList.find(
-            (m) =>
-              m.instrument?.toLowerCase().includes('voz') ||
-              m.instrument?.toLowerCase().includes('cantante')
-          ) || mList[0];
+        const firstSinger = mList.find((m) => m.instrument?.toLowerCase().includes('voz') || m.instrument?.toLowerCase().includes('cantante')) || mList[0];
         setPrincipalSinger(firstSinger.name);
       }
     } catch (err) {
@@ -48,32 +45,20 @@ export const useEventsForm = () => {
     }
   }, [authRepository, eventRepository, absentRepository, currentYear, currentMonth, principalSinger]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handlePrevMonth = () => {
-    if (currentMonth === 1) {
-      setCurrentMonth(12);
-      setCurrentYear((y) => y - 1);
-    } else {
-      setCurrentMonth((m) => m - 1);
-    }
+    if (currentMonth === 1) { setCurrentMonth(12); setCurrentYear((y) => y - 1); }
+    else { setCurrentMonth((m) => m - 1); }
   };
 
   const handleNextMonth = () => {
-    if (currentMonth === 12) {
-      setCurrentMonth(1);
-      setCurrentYear((y) => y + 1);
-    } else {
-      setCurrentMonth((m) => m + 1);
-    }
+    if (currentMonth === 12) { setCurrentMonth(1); setCurrentYear((y) => y + 1); }
+    else { setCurrentMonth((m) => m + 1); }
   };
 
   const toggleDateSelection = (dateStr: string) => {
-    setSelectedDates((prev) =>
-      prev.includes(dateStr) ? prev.filter((d) => d !== dateStr) : [...prev, dateStr]
-    );
+    setSelectedDates((prev) => prev.includes(dateStr) ? prev.filter((d) => d !== dateStr) : [...prev, dateStr]);
   };
 
   const selectRecurringDay = (dayOfWeek: number) => {
@@ -94,17 +79,10 @@ export const useEventsForm = () => {
     if (!activeSingerName || isGuestSinger || selectedDates.length === 0) return [];
     const user = members.find((m) => m.name.toLowerCase() === activeSingerName.toLowerCase());
     if (!user) return [];
-
     const found: ConflictInfo[] = [];
     selectedDates.forEach((dateStr) => {
       const abs = monthAbsents.find((a) => a.userId === user.id && a.date === dateStr);
-      if (abs) {
-        found.push({
-          date: dateStr,
-          singerName: user.name,
-          reason: abs.reason,
-        });
-      }
+      if (abs) found.push({ date: dateStr, singerName: user.name, reason: abs.reason });
     });
     return found;
   }, [activeSingerName, isGuestSinger, selectedDates, members, monthAbsents]);
@@ -114,36 +92,64 @@ export const useEventsForm = () => {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const createNewEvents = async () => {
+    const newEvents = selectedDates.map((dateStr) => ({
+      date: dateStr,
+      eventName: eventName.trim(),
+      time: eventTime,
+      principalSinger: activeSingerName,
+      isGuestSinger,
+      notes: notes.trim(),
+      isCancelled: false,
+    }));
+    await eventRepository.createEvents(newEvents);
+    showToast(`¡${newEvents.length} evento(s) programado(s) exitosamente!`);
+    setSelectedDates([]);
+    setGuestSingerName('');
+    setNotes('');
+    await loadData();
+  };
+
+  const handleConfirmRestore = async () => {
+    if (!eventToRestore) return;
+    setLoading(true);
+    try {
+      await eventRepository.updateEvent(eventToRestore.id, {
+        eventName: eventName.trim(),
+        time: eventTime,
+        principalSinger: activeSingerName,
+        isGuestSinger,
+        notes: notes.trim(),
+        isCancelled: false,
+        cancelReason: '',
+      });
+      showToast(`¡Evento del ${eventToRestore.date} restaurado y actualizado!`);
+      setEventToRestore(null);
+      setSelectedDates([]);
+      setNotes('');
+      await loadData();
+    } catch (err: any) {
+      showToast(err.message || 'Error al restaurar el evento', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedDates.length === 0) {
-      showToast('Selecciona al menos una fecha para programar el evento', 'error');
-      return;
-    }
-    if (!activeSingerName) {
-      showToast('Por favor asigna un cantante principal', 'error');
-      return;
-    }
-    if (conflicts.length > 0) {
-      showToast('El cantante seleccionado no está disponible en las fechas marcadas en ROJO', 'error');
+    if (selectedDates.length === 0) return showToast('Selecciona al menos una fecha para programar el evento', 'error');
+    if (!activeSingerName) return showToast('Por favor asigna un cantante principal', 'error');
+    if (conflicts.length > 0) return showToast('El cantante seleccionado no está disponible en las fechas en ROJO', 'error');
+
+    const cancelledMatch = monthEvents.find((evt) => evt.isCancelled && selectedDates.includes(evt.date));
+    if (cancelledMatch) {
+      setEventToRestore(cancelledMatch);
       return;
     }
 
     setLoading(true);
     try {
-      const newEvents = selectedDates.map((dateStr) => ({
-        date: dateStr,
-        eventName: eventName.trim(),
-        time: eventTime,
-        principalSinger: activeSingerName,
-        isGuestSinger,
-      }));
-
-      await eventRepository.createEvents(newEvents);
-      showToast(`¡${newEvents.length} evento(s) programado(s) exitosamente!`);
-      setSelectedDates([]);
-      setGuestSingerName('');
-      await loadData();
+      await createNewEvents();
     } catch (err: any) {
       showToast(err.message || 'Error al guardar los eventos', 'error');
     } finally {
@@ -152,29 +158,9 @@ export const useEventsForm = () => {
   };
 
   return {
-    members,
-    monthEvents,
-    selectedDates,
-    eventName,
-    setEventName,
-    eventTime,
-    setEventTime,
-    principalSinger,
-    setPrincipalSinger,
-    isGuestSinger,
-    setIsGuestSinger,
-    guestSingerName,
-    setGuestSingerName,
-    activeSingerName,
-    conflicts,
-    loading,
-    toast,
-    currentYear,
-    currentMonth,
-    handlePrevMonth,
-    handleNextMonth,
-    toggleDateSelection,
-    selectRecurringDay,
-    handleSubmit,
+    members, monthEvents, selectedDates, eventName, setEventName, eventTime, setEventTime, notes, setNotes,
+    principalSinger, setPrincipalSinger, isGuestSinger, setIsGuestSinger, guestSingerName, setGuestSingerName,
+    activeSingerName, conflicts, loading, toast, currentYear, currentMonth, eventToRestore, setEventToRestore,
+    handlePrevMonth, handleNextMonth, toggleDateSelection, selectRecurringDay, handleSubmit, handleConfirmRestore,
   };
 };

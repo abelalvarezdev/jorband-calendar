@@ -86,6 +86,16 @@ export class InMemoryEventRepository implements EventRepository {
     return newEvents;
   }
 
+  async updateEvent(id: string, updates: Partial<Event>): Promise<Event> {
+    const existing = this.getStoredEvents();
+    const index = existing.findIndex((e) => e.id === id);
+    if (index === -1) throw new Error('Evento no encontrado');
+    const updatedEvent = { ...existing[index], ...updates };
+    existing[index] = updatedEvent;
+    this.saveEvents(existing);
+    return updatedEvent;
+  }
+
   async deleteEvent(id: string): Promise<void> {
     const events = this.getStoredEvents().filter((e) => e.id !== id);
     this.saveEvents(events);

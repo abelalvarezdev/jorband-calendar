@@ -15,26 +15,11 @@ interface SingerSelectorProps {
 }
 
 export const SingerSelector: React.FC<SingerSelectorProps> = ({
-  members,
-  principalSinger,
-  setPrincipalSinger,
-  isGuestSinger,
-  setIsGuestSinger,
-  guestSingerName,
-  setGuestSingerName,
+  members, principalSinger, setPrincipalSinger, isGuestSinger, setIsGuestSinger, guestSingerName, setGuestSingerName,
 }) => {
-  const singerMembers = members.filter(
-    (m) =>
-      m.instrument?.toLowerCase().includes('voz') ||
-      m.instrument?.toLowerCase().includes('cantante')
-  );
-
-  const displayMembers = singerMembers.length > 0 ? singerMembers : members;
-
-  const options = displayMembers.map((m) => ({
-    value: m.name,
-    label: `${m.name} (${m.instrument})`,
-  }));
+  const filtered = members.filter((m) => m.instrument?.toLowerCase().includes('voz') || m.instrument?.toLowerCase().includes('cantante'));
+  const list = filtered.length > 0 ? filtered : members;
+  const options = list.map((m) => ({ value: m.name, label: `${m.name} (${m.instrument})` }));
 
   return (
     <div className="space-y-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">

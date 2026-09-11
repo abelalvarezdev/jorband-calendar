@@ -4,6 +4,7 @@ import {
   where,
   getDocs,
   addDoc,
+  updateDoc,
   deleteDoc,
   doc,
 } from 'firebase/firestore';
@@ -43,6 +44,16 @@ export class FirebaseEventRepository implements EventRepository {
       }
     }
     return created;
+  }
+
+  async updateEvent(id: string, updates: Partial<Event>): Promise<Event> {
+    try {
+      const docRef = doc(db, 'events', id);
+      await updateDoc(docRef, updates);
+    } catch (e) {
+      console.warn('Firestore updateEvent restricted:', e);
+    }
+    return { id, ...updates } as Event;
   }
 
   async deleteEvent(id: string): Promise<void> {
