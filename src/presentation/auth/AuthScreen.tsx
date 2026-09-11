@@ -4,7 +4,6 @@ import { AuthHeader } from './components/AuthHeader';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { Toast } from '../shared/Toast';
-import { UserRole } from '../../domain/types';
 
 export const AuthScreen: React.FC = () => {
   const auth = useAuth();
@@ -12,7 +11,6 @@ export const AuthScreen: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
-  const [role, setRole] = useState<UserRole>('User');
   const [instrument, setInstrument] = useState<string>('Voz Principal');
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -24,7 +22,7 @@ export const AuthScreen: React.FC = () => {
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !name) return auth.setError('Nombre y correo son requeridos');
-    try { await auth.register({ name, email, password, role, instrument }); } catch {}
+    try { await auth.register({ name, email, password, role: 'User', instrument }); } catch {}
   };
 
   return (
@@ -35,7 +33,7 @@ export const AuthScreen: React.FC = () => {
         {isLoginMode ? (
           <LoginForm email={email} setEmail={setEmail} password={password} setPassword={setPassword} onSubmit={handleLoginSubmit} onSwitchMode={() => setIsLoginMode(false)} loading={auth.loading} />
         ) : (
-          <RegisterForm name={name} setName={setName} email={email} setEmail={setEmail} password={password} setPassword={setPassword} role={role} setRole={setRole} instrument={instrument} setInstrument={setInstrument} onSubmit={handleRegisterSubmit} onSwitchMode={() => setIsLoginMode(true)} loading={auth.loading} />
+          <RegisterForm name={name} setName={setName} email={email} setEmail={setEmail} password={password} setPassword={setPassword} instrument={instrument} setInstrument={setInstrument} onSubmit={handleRegisterSubmit} onSwitchMode={() => setIsLoginMode(true)} loading={auth.loading} />
         )}
       </div>
     </div>
