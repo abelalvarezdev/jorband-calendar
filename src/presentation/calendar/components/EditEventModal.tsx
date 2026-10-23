@@ -4,6 +4,7 @@ import { Input } from '../../shared/Input';
 import { Event, User } from '../../../domain/types';
 import { Edit, Calendar } from 'lucide-react';
 import { SingerSelector } from '../../events/components/SingerSelector';
+import { SpecialEventToggle } from '../../events/components/SpecialEventToggle';
 
 interface EditEventModalProps {
   eventToEdit: Event;
@@ -22,12 +23,13 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   const [principalSinger, setPrincipalSinger] = useState(eventToEdit.principalSinger);
   const [isGuestSinger, setIsGuestSinger] = useState(eventToEdit.isGuestSinger);
   const [guestSingerName, setGuestSingerName] = useState(eventToEdit.isGuestSinger ? eventToEdit.principalSinger : '');
+  const [isSpecialEvent, setIsSpecialEvent] = useState(Boolean(eventToEdit.isSpecialEvent));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const activeSinger = isGuestSinger ? guestSingerName.trim() : principalSinger;
     if (!activeSinger) return;
-    onSave({ eventName: eventName.trim(), time, principalSinger: activeSinger, isGuestSinger, notes: notes.trim() });
+    onSave({ eventName: eventName.trim(), time, principalSinger: activeSinger, isGuestSinger, isSpecialEvent, notes: notes.trim() });
   };
 
   return (
@@ -40,6 +42,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-3">
           <Input label="Nombre del Evento" value={eventName} onChange={(e) => setEventName(e.target.value)} required />
           <Input label="Hora" value={time} onChange={(e) => setTime(e.target.value)} required />
+          <SpecialEventToggle isSpecialEvent={isSpecialEvent} onChange={setIsSpecialEvent} />
           <Input label="Notas de Servicio" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Instrucciones opcionales..." />
           <SingerSelector members={members} principalSinger={principalSinger} setPrincipalSinger={setPrincipalSinger} isGuestSinger={isGuestSinger} setIsGuestSinger={setIsGuestSinger} guestSingerName={guestSingerName} setGuestSingerName={setGuestSingerName} />
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
