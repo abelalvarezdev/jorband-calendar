@@ -29,3 +29,16 @@ export const buildEditNotification = (
     eventDate: formattedDate,
   };
 };
+
+export const buildSpecialEventNotification = (
+  event: Event
+): NotificationPayload => {
+  const formattedDate = toDayMonthYear(event.date);
+  const notesText = event.notes ? ` • Notas: ${event.notes}` : '';
+  return {
+    title: `🌟 ¡Evento Especial Programado! (${formattedDate})`,
+    body: `${event.eventName} (${event.time}) • Voz: ${event.principalSinger}${notesText}`,
+    tag: `special-${event.id}-${Date.now()}`,
+    eventDate: formattedDate,
+  };
+};
