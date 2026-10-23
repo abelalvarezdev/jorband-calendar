@@ -40,3 +40,13 @@ export interface RegisterData {
   role: UserRole;
   instrument: string;
 }
+
+export type NotificationPermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
+
+export interface NotificationPayload {
+  title: string;
+  body: string;
+  tag: string;
+  eventDate?: string;
+  targetUserName?: string;
+}
