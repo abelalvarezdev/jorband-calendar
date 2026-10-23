@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCalendar } from './hooks/useCalendar';
 import { CalendarHeader } from './components/CalendarHeader';
 import { CalendarGrid } from './components/CalendarGrid';
@@ -8,6 +8,20 @@ import { CancelEventModal } from './components/CancelEventModal';
 
 export const CalendarScreen: React.FC = () => {
   const calendar = useCalendar();
+
+  useEffect(() => {
+    const pendingDate = sessionStorage.getItem('jorband_selected_date');
+    if (pendingDate) {
+      calendar.setSelectedDateStr(pendingDate);
+      sessionStorage.removeItem('jorband_selected_date');
+    }
+    const onSelectDate = (e: Event) => {
+      const dateStr = (e as CustomEvent<string>).detail;
+      if (dateStr) calendar.setSelectedDateStr(dateStr);
+    };
+    window.addEventListener('jorband-select-date', onSelectDate);
+    return () => window.removeEventListener('jorband-select-date', onSelectDate);
+  }, [calendar.setSelectedDateStr]);
 
   return (
     <div className="space-y-4">
